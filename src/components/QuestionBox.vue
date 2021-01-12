@@ -1,15 +1,15 @@
 <template>
-
    <div class="question-box-container">
     <b-jumbotron>
-        <template>
+        <template slot="lead">
         {{ currentQuestion.question }}
         </template>
 
-        <hr class="my-4">
+        <hr class="my-4" />
+
         <b-list-group>
             <b-list-group-item
-                v-for="(answer, index) in answers"
+                v-for="(answer, index) in shuffledAnswers"
                 :key="index"  
                 @click="selectAnswer(index)"
                 :class="[selectedIndex === index ? 'selected' : '']"
@@ -18,8 +18,14 @@
             </b-list-group-item>
         </b-list-group>
         
-        <b-button variant="primary" href="#">Submit</b-button>
-        <b-button @click="next" variant="success" href="#">
+        <b-button 
+            variant="primary"
+            @click="submitAnswer" 
+            :disabled="selectedIndex === null"  
+        >
+            Submit
+        </b-button>
+        <b-button @click="next" variant="success">
             Next
         </b-button>
     </b-jumbotron>
@@ -32,11 +38,13 @@ import _ from 'lodash'
 export default {
     props: {
         currentQuestion: Object,
-        next: Function
+        next: Function,
+        increment: Function
     },
     data() {
         return {
             selectedIndex: null,
+            correctIndex: null,
             shuffledAnswers: []
         }
     },
@@ -60,10 +68,18 @@ export default {
         selectAnswer(index) {
             this.selectedIndex = index
         },
+        submitAnswer() {
+            let isCorrect = false
+
+            if (this.selectedIndex === this.correctIndex) {
+                isCorrect = true
+            }
+
+            this.increment(isCorrect)
+        },
         shuffleAnswers() {
             let answers = [...this.currentQuestion.incorrect_answers, this.currentQuestion.correct_answer]
             this.shuffledAnswers = _.shuffle(answers)
-            console.log(this.shuffledAnswers)
         }
     }
 }
